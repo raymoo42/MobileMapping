@@ -1,0 +1,20 @@
+// C Library
+http://urgnetwork.sourceforge.net/html/
+https://sourceforge.net/p/urgnetwork/wiki/Home/
+
+// ROS
+http://wiki.ros.org/urg_node
+
+// MATLAB ADDON HOKUYO UTM
+Muss in Addon Ordner utmDecode mithilfe von mex kompilieren
+per fclose tcp verbindung schließen, bevor neue initialisiert wird
+
+
+// Betrieb
+ - Hokyuo per Ethernet an PC anschließen
+ - Adapter Einstellungen -> IPv4 -> Setze IP auf 192.168.0.15 / 24
+ - Hokuyos Standard IP is 192.168.0.10 , Port 10940 
+ - Test mit netcat/matlab instrument control
+ - MEASUREMENT MODE --> Sende BM\n über tcp
+ - Scan Daten mithilfe z.b. 'HD0000108000' (HDxxxxYYYYzz; xxxx = start, yyyy=end-position) bekommen (von 0 - 1080 = voller Bereich)
+ - muss dann decoded werden
