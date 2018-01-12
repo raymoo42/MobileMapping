@@ -11,7 +11,8 @@ hokuyo = utmOpen('192.168.0.10');
 player = pcplayer([-5000 5000],[-5000 5000],[-5000 5000]);
 % Define Scan Parameters
 res = 0.25;
-f1 = figure;
+% create position vector
+pos = [0 0 0 1]
 for j = 1:100
     
     [scan, timestamp] = utmGetScan(hokuyo, 0, 1080);
@@ -31,19 +32,21 @@ for j = 1:100
     denoised = pcdenoise(ptCloud);
     
     % downsample
-    %downsampled = pcdownsample(ptCloud,'gridAverage',25);
-    downsampled = denoised;
+    downsampled = pcdownsample(ptCloud,'gridAverage',25);
+    %downsampled = ptCloud;
     view(player, downsampled);
     
     % diff to previous cloud
-    if exist('old_downsampled', 'var')
+    if j > 1
+        figure
+        plot (downsampled.Location(:,1),downsampled.Location(:,2),'k.');
+        hold on;
+        plot (old_downsampled.Location(:,1),old_downsampled.Location(:,2),'r.');
         transform = pcregrigid(downsampled, old_downsampled,'Extrapolate',true);
-        test(j,:) = transform.T(4,1:2) + test(j-1,:);
+        pos(j,:) = transform.T' * pos(j-1,:)';
     end
     old_downsampled = denoised;
 end
-f2 = figure;
-plot(test(:,1),test(:,2))
 
 
 fclose(hokuyo);
