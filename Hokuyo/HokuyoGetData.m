@@ -13,7 +13,8 @@ player = pcplayer([-5000 5000],[-5000 5000],[-5000 5000]);
 res = 0.25;
 % create position vector
 pos = [0 0 0 1]
-for j = 1:100
+figure(2)
+while isOpen(player)
     
     [scan, timestamp] = utmGetScan(hokuyo, 0, 1080);
 
@@ -23,7 +24,7 @@ for j = 1:100
     rangeVector=scan;
 
     % points = [cos(angle) .* scan'; sin(angle) .* scan'; zeros(size(angle))]';
-    points = [rangeVector.*cos(angleVector), rangeVector.*sin(angleVector), zeros(size(rangeVector))];
+    points = [rangeVector.*sin(angleVector), rangeVector.*cos(angleVector), zeros(size(rangeVector))];
     
     % into pointcloud
     ptCloud = pointCloud(points);
@@ -37,17 +38,18 @@ for j = 1:100
     view(player, downsampled);
     
     % diff to previous cloud
-    if j > 1
-        figure
-        plot (downsampled.Location(:,1),downsampled.Location(:,2),'k.');
-        hold on;
-        plot (old_downsampled.Location(:,1),old_downsampled.Location(:,2),'r.');
-        transform = pcregrigid(downsampled, old_downsampled,'Extrapolate',true);
-        pos(j,:) = transform.T' * pos(j-1,:)';
-    end
-    old_downsampled = denoised;
+%     if j > 1
+% %         figure(1)
+% 
+% %         plot (downsampled.Location(:,1),downsampled.Location(:,2),'k.');
+% %         hold on;
+% %         plot (old_downsampled.Location(:,1),old_downsampled.Location(:,2),'r.');
+%         transform = pcregrigid(downsampled, old_downsampled,'Extrapolate',true);
+%         pos(j,:) = transform.T' * pos(j-1,:)';
+%         pause(0.1);
+%         
+%     end
+%     old_downsampled = denoised;
 end
-
-
 fclose(hokuyo);
 disp('the end')
