@@ -16,8 +16,8 @@ player = pcplayer([-5000 5000],[-5000 5000],[-5000 5000]);
 
 
 % Define Scan Parameters
-InitParameters.camera_resolution = 2; %HD720
-InitParameters.camera_fps = 30;
+InitParameters.camera_resolution = 0; %HD720
+InitParameters.camera_fps = 15;
 InitParameters.system_units = 2; %METER
 InitParameters.depth_mode =  1; %PERFORMANCE
 InitParameters.coordinate_system = 3; %COORDINATE_SYSTEM_RIGHT_HANDED_Z_UP
@@ -37,6 +37,8 @@ res = 0.25;
 
 mexZED('setDepthMaxRangeValue', depth_max)
 
+v =  VideoWriter('test.avi');
+open(v);
 while isOpen(player)
     %get hokyuo scan
     [scan, timestamp] = utmGetScan(hokuyo, 0, 1080);
@@ -55,7 +57,25 @@ while isOpen(player)
     
     % PointClouds
     ptCloudHokuyo = pointCloud(pointsHokuyo);
+    %%
+    % add hokuyo points in z +10/-10
+    transform_plus = [ 1 0 0 0;
+                      0 1 0 0;
+                      0 0 1 0
+                      0 0 250 1];
+    tform_pls = affine3d(transform_plus);
+    ptPlus = pctransform(ptCloudHokuyo, tform_pls);
+    transform_minus = [ 1 0 0 0;
+                      0 1 0 0;
+                      0 0 1 0
+                      0 0 -250 1];
+    tform_min = affine3d(transform_minus);
+    ptMinus = pctransform(ptCloudHokuyo, tform_min);
+    % merge
+    ptCloudHokuyo = pcmerge(ptCloudHokuyo, ptMinus, 0.015);
+    ptCloudHokuyo = pcmerge(ptCloudHokuyo, ptPlus, 0.015);
     
+    % ZED
     pointsZed = 1000 * [pt_X(:), pt_Y(:), pt_Z(:)];
     pointsZed = pointsZed( ~any( isnan( pointsZed) | isinf( pointsZed ),2) ,:);
     ptCloudZed = pointCloud(pointsZed);
@@ -65,23 +85,26 @@ while isOpen(player)
     denoisedZed = pcdenoise(ptCloudZed);
     
     %downsampling
-    downsampledHokuyo = pcdownsample(denoisedHokuyo,'gridAverage',0.1);
-    downsampledZed = pcdownsample(denoisedZed,'gridAverage', 0.1);
+    downsampledHokuyo = pcdownsample(denoisedHokuyo,'gridAverage',1);
+    downsampledZed = pcdownsample(denoisedZed,'gridAverage', 1);
     
     %icp
-    transform = pcregrigid(downsampledZed, downsampledHokuyo,'Metric','pointToPoint');
+    transform = pcregrigid(downsampledZed, downsampledHokuyo, 'Metric', 'pointToPoint');
     
     % transform Zed Cloud
-    transformedPtCloud = pctransform(ptCloudZed, transform);
+    transformedPtCloud = pctransform(downsampledZed, transform);
     
     % merge
-    ptResult = pcmerge(ptCloudHokuyo, transformedPtCloud, 0.015)
+    ptResult = pcmerge(downsampledHokuyo, transformedPtCloud, 0.015)
    
     %displaying
-    view(player, transformedPtCloud);
+    view(player, ptResult);
+    F = getframe();
+    writeVideo(v, F);
     pause(0.5)
 end
 
+close(v)
 mexZED('close')
 clear mex;
 fclose(hokuyo);
