@@ -21,7 +21,7 @@ mexZED('create');
 InitParameters.camera_resolution = 0;   %2K
 InitParameters.camera_fps = 15;         %FPS
 InitParameters.system_units = 2;        %METER
-InitParameters.depth_mode =  2;         %PERFORMANCE
+InitParameters.depth_mode =  2;         %Quality
 InitParameters.coordinate_system = 3;   %COORDINATE_SYSTEM_RIGHT_HANDED_Z_UP
 
 result = mexZED('open', InitParameters);
@@ -30,7 +30,7 @@ result = mexZED('open', InitParameters);
 depth_max = 5;
 % Step for mesh display
 data_Step = 10;
-requested_mesh_size = [1024 1024];
+requested_mesh_size = [2560 720];
 
 pt_X = zeros(requested_mesh_size);
 pt_Y = zeros(requested_mesh_size);
