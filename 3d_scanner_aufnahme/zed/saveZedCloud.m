@@ -20,7 +20,7 @@ result = mexZED('open', InitParameters)
 depth_max = 5;
 % Step for mesh display
 data_Step = 10;
-requested_mesh_size = [512 256];
+requested_mesh_size = [2096 1080];
 pt_X = zeros(requested_mesh_size);
 pt_Y = zeros(requested_mesh_size);
 pt_Z = zeros(requested_mesh_size);
@@ -35,7 +35,7 @@ mexZED('setDepthMaxRangeValue', depth_max)
     RuntimeParameters.enable_depth = 1;
     RuntimeParameters.enable_point_cloud = 1;
     
-    for i=0:10
+    for i=0:1
         mexZED('grab', RuntimeParameters)
         [pt_X, pt_Y, pt_Z] = mexZED('retrieveMeasure', 3, requested_mesh_size(1), requested_mesh_size(2)); %XYZ pointcloud
 
@@ -46,7 +46,7 @@ mexZED('setDepthMaxRangeValue', depth_max)
         ptCloudZed = pointCloud(pointsZed);
         ptCloudZed = removeInvalidPoints(ptCloudZed);
 
-        pcwrite(ptCloudZed, 'data/zedCloud_' + num2str(i) + '.pcd');
+        pcwrite(ptCloudZed, '02_zed_050318.pcd');
     end
 mexZED('close')
 clear mex;

@@ -1,0 +1,3 @@
+00_hokuyo_050318 -> 05_hokuyo_050318 = Aufnahmen ohne Punkt
+
+Mittelwert/Ausgleichen und dann mit P1, P2 etc überlagern um Punkte zu finden
